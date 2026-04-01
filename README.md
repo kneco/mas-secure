@@ -1,72 +1,83 @@
 # ai-enclave
 
-Secure, isolated AI agent development environment. Containerized with Docker to limit blast radius to the enclave.
+AIエージェントのためのセキュアな隔離開発環境。Dockerコンテナにより、エージェントの影響範囲をコンテナ内に限定する。
 
-## What is this?
+## これは何？
 
-A pre-configured Docker environment for AI-assisted development. Clone your repo inside, run Claude Code or other AI tools, and work safely — the container cannot touch your host filesystem (except a read-only data input).
+AI支援開発のための事前構成済みDocker環境。コンテナ内にリポジトリをcloneし、Claude Code等のAIツールで安全に作業できる。ホストのファイルシステムには触れない（読み取り専用のデータ投入口を除く）。
 
-## Pre-installed Tools
+## プリインストール済みツール
 
-| Tool | Version | Purpose |
-|------|---------|---------|
-| Claude Code CLI | latest | AI coding assistant |
-| code-server | latest | Browser-based VS Code (port 8080) |
-| GitHub CLI (gh) | latest | GitHub operations |
-| Bitwarden CLI (bw) | latest | Secrets management |
-| Node.js | 22.x | JavaScript runtime |
-| Python 3 | system | Scripting & automation |
-| tmux | system | Terminal multiplexer |
-| git | system | Version control |
-| ripgrep, fd, fzf, jq | system | Search & data processing |
+| ツール | バージョン | 用途 |
+|--------|-----------|------|
+| Claude Code CLI | latest | AIコーディングアシスタント |
+| code-server | latest | ブラウザベースVS Code (port 8080) |
+| GitHub CLI (gh) | latest | GitHub操作 |
+| Bitwarden CLI (bw) | latest | シークレット管理 |
+| Node.js | 22.x | JavaScriptランタイム |
+| Python 3 | system | スクリプト・自動化 |
+| tmux | system | ターミナルマルチプレクサ |
+| git | system | バージョン管理 |
+| ripgrep, fd, fzf, jq | system | 検索・データ処理 |
 
-## Quick Start
+## クイックスタート
+
+### Windows (bat)
+
+```bat
+setup4win.bat
+```
+
+ダブルクリックで intel ディレクトリ作成 → Docker ビルド → コンテナ起動まで自動実行。
+
+### 手動
 
 ```bash
-# 1. Build & start
+# 1. ビルド & 起動
 docker compose build
 docker compose up -d
 
-# 2. Enter the enclave
+# 2. コンテナに入る
 docker exec -it ai-enclave bash
 
-# 3. Clone your project
+# 3. プロジェクトをclone
 git clone https://github.com/<user>/<repo> /workspace/<repo>
 cd /workspace/<repo>
 
-# 4. Authenticate Claude Code (first time only)
+# 4. Claude Code認証（初回のみ）
 claude
 
-# 5. Start code-server (optional)
+# 5. code-server起動（任意）
 code-server --bind-addr 0.0.0.0:8080 /workspace
-# Then open http://localhost:8080 in your browser
+# ブラウザで http://localhost:8080 を開く
 ```
 
-## Volume Layout
+## ボリューム構成
 
-| Volume | Type | Purpose |
-|--------|------|---------|
-| `enclave-workspace` | Named | Project files (container-only) |
-| `enclave-claude-config` | Named | ~/.claude config persistence |
-| `/intel` | Bind (read-only) | Data input from host |
+| ボリューム | 種別 | 用途 |
+|-----------|------|------|
+| `enclave-workspace` | 名前付き | プロジェクトファイル（コンテナ専用） |
+| `enclave-claude-config` | 名前付き | ~/.claude 設定永続化 |
+| `/intel` | bind (読み取り専用) | ホストからのデータ投入口 |
 
-## Security
+## セキュリティ
 
-Compared to running AI agents directly on your host:
+ホスト上で直接AIエージェントを動かす場合と比較して：
 
-- **Filesystem isolation**: Cannot access host files outside `/intel` (read-only)
-- **Non-root user**: Runs as `agent` (UID 1000)
-- **no-new-privileges**: Prevents privilege escalation
-- **Named volumes**: Workspace is invisible from host — no accidental host file modification
-- **Read-only intel**: Data input is one-way (host → container)
+- **ファイルシステム隔離**: `/intel`（読み取り専用）以外のホストファイルにアクセス不可
+- **非rootユーザー**: `agent` (UID 1000) で実行
+- **no-new-privileges**: 権限昇格を防止
+- **名前付きボリューム**: ワークスペースはホストから不可視 — ホストファイルの誤操作を防止
+- **読み取り専用intel**: データ入力は一方向（ホスト → コンテナ）
 
-## Host-side Utilities
+## ホスト側ユーティリティ
 
-| File | Purpose |
-|------|---------|
-| `scripts/ntfy_toast.ps1` | Windows toast notifications via ntfy.sh (PowerShell 5.1+) |
+| ファイル | 用途 |
+|---------|------|
+| `setup4win.bat` | Windowsセットアップ（intel作成 → ビルド → 起動） |
+| `scripts/ntfy_toast.ps1` | ntfy.sh経由のWindows toast通知受信 (PowerShell 5.1+) |
 
-## Image Distribution
+## イメージ配布
 
 ```bash
 # GitHub Container Registry
